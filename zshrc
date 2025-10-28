@@ -8,12 +8,13 @@
 # --------------------------------
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-
+export PATH="$HOME/Sync/venv/bin:$PATH"
 # API Keys (consider moving to a separate private file)
 [ -f ~/.private_env ] && source ~/.private_env
 # Directory paths
 export ZSH="$HOME/.oh-my-zsh"
 export NVM_DIR="$HOME/.nvm"
+export PATH="$HOME/webdev/venv/bin:$PATH"
 
 # --------------------------------
 # PATH Configuration
@@ -95,9 +96,9 @@ smart_ls() {
 # Aliases
 # --------------------------------
 # Navigation shortcuts
-alias lyc="cd /mnt/c/Users/steph/OneDrive\ -\ Région\ Île-de-France"
+alias lyc='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes" && ls -l'
 alias nts="cd /mnt/c/Users/steph/OneDrive\ -\ Région\ Île-de-France/nts"
-alias notes="cd /home/steph/notes"
+alias notes="cd /home/steph/notes && ls -l"
 alias pc="cd /mnt/c/Users/steph"
 
 # File operations - using smart_ls function
@@ -106,9 +107,11 @@ alias ll="smart_ls -al"
 alias li="smart_ls -1d .[^.]* .??* 2>/dev/null | sort -u"
 alias ls="smart_ls"
 alias open="explorer.exe"
-alias tag="filetags"
 alias fd="fdfind"
 alias bat="batcat"
+alias poub="~/.local/bin/poubelle.sh"
+alias chess-analyze='source ~/chess_annotator/venv/bin/activate && python3 ~/chess_annotator/analyzer.py'
+
 
 # Development
 alias nn="nvim"
@@ -118,7 +121,6 @@ alias hugodev="hugo server --disableFastRender --watch --poll 1000ms"
 alias aider='aider --model claude-3-5-sonnet-20241022'
 
 # File opening shortcuts
-alias simple='cmd.exe /c start "" "$(wslpath -w /mnt/c/Users/Steph/Documents/Chess/Livres/strategy/simple_chess.epub)"'
 
 # Cloud sync aliases
 alias update_prem='rclone sync ~/Sync/premieres/public/ ovh:premieres/ --progress --size-only'
@@ -134,8 +136,9 @@ alias T9='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classe
 alias S5='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/S5" && ls -l'
 alias T10='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/T10_T11" && ls -l'
 alias P3='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/P3" && ls -l'
-alias S9='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/S9" && ls -l'
+alias S9='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/S2_S9" && ls -l'
 alias P9='cd "/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/P9" && ls -l'
+alias mt='csv_to_md.py'
 # --------------------------------
 # External Tool Configurations
 # --------------------------------
@@ -181,61 +184,44 @@ open-with-windows() {
 alias openw='open-with-windows'
 
 
-# csv list to markdown table
-mdtable() {
-    if [ $# -lt 2 ]; then
-        echo "Usage: mdtable <file.csv> <title> [extra_columns...]"
+
+
+
+
+# Lexicon script shortcut
+lexicon() {
+    local venv_path="$HOME/webdev/venv"
+    local script_path="$HOME/Sync/scripts/lexicon.py"
+    
+    if [ $# -eq 0 ]; then
+        echo "Usage: lexicon <path_to_markdown_file>"
         return 1
     fi
-
-    local csv="$1"
-    local title="$2"
-    shift 2
-    local extras=("$@")
-    # Replace spaces/underscores with dashes for filename
-    local filename="${title// /_}.md"
-    filename="${filename//_/-}"
-
-    local first_creation=false
-
-    # If file doesn't exist, create it with frontmatter
-    if [ ! -f "$filename" ]; then
-        local date=$(date +%Y-%m-%d)
-        {
-            echo "---"
-            echo "title: \"${title//_/ }\""
-            echo "date: $date"
-            echo "tags: []"
-            echo "---"
-            echo
-            echo "# ${title//_/ }"
-            echo
-        } > "$filename"
-        first_creation=true
-    fi
-
-    # Append the table
-    csv_to_md.py "$csv" "${extras[@]}" >> "$filename"
-
-    # Open in nvim:
-    if $first_creation; then
-        # Jump to tags, move inside [], enter insert mode
-        nvim +"/tags: \[\]" +"normal f[a" "$filename"
-    else
-        nvim "$filename"
-    fi
-        # Open in nvim:
-    if $first_creation; then
-        nvim +"call search('tags: \\[\\]')" \
-             +"normal f[" \
-             +"call feedkeys('i', 'n')" \
-             "$filename"
-    else
-        nvim "$filename"
-    fi
-
+    
+    source "$venv_path/bin/activate"
+    python3 "$script_path" "$@"
+    deactivate
 }
 
+# Blog script shortcut
+blog() {
+    local venv_path="$HOME/webdev/venv"
+    local script_path="$HOME/Sync/scripts/blog.py"
+    
+    source "$venv_path/bin/activate"
+    python3 "$script_path" "$@"
+    deactivate
+}
+
+# Add verbs script shortcut
+add-verbs() {
+    local venv_path="$HOME/webdev/venv"
+    local script_path="$HOME/Sync/scripts/add_verbs.py"
+    
+    source "$venv_path/bin/activate"
+    python3 "$script_path" "$@"
+    deactivate
+}
 
 # --------------------------------
 # Final Initialization
