@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Student Comments Generator - Global Wrapper
+# This script calls the Python script from wherever it's installed
+
+# Find the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Call the Python script with all arguments
+python3 "$SCRIPT_DIR/csv_to_comments.py" "$@"

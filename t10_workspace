@@ -1,0 +1,12 @@
+#!/bin/bash
+# ~/scripts/open-t10-workspace.sh
+
+# Open PNG with Windows default viewer
+cmd.exe /c start "" "C:\Users\steph\OneDrive - Région Île-de-France\Charly\Classes\T10_T11\tromb.png"
+
+# Open two terminal tabs with neovim
+wt.exe \
+  new-tab wsl.exe bash -c "nvim '/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/Classes/T10_T11/comments_T10_T11.md'" \; \
+  new-tab wsl.exe bash -c "nvim '/mnt/c/Users/steph/OneDrive - Région Île-de-France/Charly/classes/nts/journal_T10_T11.md'"
+
+
