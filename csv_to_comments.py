@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 """
-CSV to Student Comments Converter
-Converts a student CSV file into a formatted document for writing comments.
+CSV to Student Comments Generator
 
-Usage:
-    python csv_to_comments.py input.csv [output_format]
-    
-    output_format can be: md, txt, csv, or all (default: md)
-    
-Examples:
-    python csv_to_comments.py ANGLAIS_LV1.csv
-    python csv_to_comments.py ANGLAIS_LV1.csv all
-    python csv_to_comments.py my_class.csv txt
+Convert a CSV file of student names into a formatted comments template.
+Supports multiple output formats: markdown, plain text, and CSV.
 """
 
 import csv
@@ -20,18 +12,86 @@ import os
 from pathlib import Path
 
 
+def show_help():
+    """Display detailed help information."""
+    help_text = """
+CSV to Student Comments Generator
+==================================
+
+USAGE:
+    python3 csv_to_comments.py INPUT_FILE [FORMAT]
+
+ARGUMENTS:
+    INPUT_FILE    Path to the CSV file containing student names
+                  Supports two formats:
+                  - Clean CSV: First Name, Surname (comma-separated)
+                  - Grade sheet: SURNAME First-name (semicolon-separated)
+    
+    FORMAT        Output format (optional, default: md)
+                  Options:
+                  - md     Markdown format (.md)
+                  - txt    Plain text format (.txt)
+                  - csv    CSV format (.csv)
+                  - all    Generate all three formats
+
+EXAMPLES:
+    # Generate markdown file (default)
+    python3 csv_to_comments.py students.csv
+    
+    # Generate plain text file
+    python3 csv_to_comments.py students.csv txt
+    
+    # Generate all formats
+    python3 csv_to_comments.py students.csv all
+
+INPUT FILE FORMATS:
+    
+    1. Clean CSV (comma-separated):
+       First Name,Surname
+       John,Smith
+       Marie,Dupont
+    
+    2. Grade Sheet (semicolon-separated):
+       SMITH John;12;15;...
+       DUPONT Marie;14;13;...
+
+OUTPUT:
+    Files are created in the current directory with names like:
+    - comments_students.md
+    - comments_students.txt
+    - comments_students.csv
+
+OPTIONS:
+    -h, --help    Show this help message
+
+NOTES:
+    - Students are automatically sorted by surname
+    - Grade sheets skip header rows and summary rows
+    - UTF-8 encoding is used for all files
+"""
+    print(help_text)
+
+
 def extract_students(csv_file):
-    """Extract student names from CSV file."""
+    """Extract student names from CSV file.
+    
+    Handles two formats:
+    1. Clean CSV: First Name, Surname (comma-separated)
+    2. Grade sheet: SURNAME First-name (semicolon-separated)
+    
+    Returns:
+        list: List of (first_name, surname) tuples sorted by surname
+    """
     students = []
     
     try:
-        # First, try to detect the format by reading a few lines
+        # Detect CSV format by checking first line
         with open(csv_file, 'r', encoding='utf-8-sig') as f:
             first_line = f.readline()
-            second_line = f.readline()
         
-        # Check if it's already a cleaned CSV (comma-separated with headers)
-        if ('First Name' in first_line and 'Surname' in first_line) or ('Prénom' in first_line and 'Nom' in first_line):
+        is_clean_csv = ',' in first_line and ';' not in first_line
+        
+        if is_clean_csv:
             # It's a cleaned CSV format
             with open(csv_file, 'r', encoding='utf-8-sig') as f:
                 reader = csv.reader(f, delimiter=',')
@@ -135,9 +195,11 @@ def create_csv(students, output_file):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
+    """Main function to process arguments and generate output files."""
+    # Check for help flag
+    if len(sys.argv) < 2 or sys.argv[1] in ['-h', '--help', 'help']:
+        show_help()
+        sys.exit(0)
     
     input_file = sys.argv[1]
     output_format = sys.argv[2] if len(sys.argv) > 2 else 'md'
